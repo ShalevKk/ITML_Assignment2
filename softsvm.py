@@ -23,8 +23,16 @@ def define_u(d: int, m: int) -> np.ndarray:
     return np.vstack((u1, u2))
 
 
-def define_A():
-    return None
+def define_A(d: int, m: int, trainX: np.ndarray, trainY: np.ndarray):
+    trainY = trainY.reshape(-1, 1)
+    A11: np.ndarray = trainY * trainX
+    A12: np.ndarray = np.identity(m)
+    A21: np.ndarray = np.zeros((m, d))
+    A22: np.ndarray = np.identity(m)
+    upper_part: np.ndarray = np.concatenate((A11, A12), axis=1)
+    lower_part: np.ndarray = np.concatenate((A21, A22), axis=1)
+    A: np.ndarray = np.concatenate((upper_part, lower_part), axis=0)
+    return A
 
 
 def define_v(m: int) -> np.ndarray:
@@ -49,12 +57,12 @@ def softsvm(l, trainX: np.array, trainy: np.array):
     # TODO: consider sparse the matrices
     H: matrix = matrix(define_H(l=l, d=d, m=m))
     u: matrix = matrix(define_u(d=d, m=m))
-    A: matrix = matrix(define_A())
+    A: matrix = matrix(define_A(d=d, m=m, trainX=trainX, trainY=trainy))
     v: matrix = matrix(define_v(m=m))
 
-    sol = cvxopt.solvers.qp(H, u, -A, -v)
-
-    return sol["x"]
+    sol = solvers.qp(H, u, -A, -v)
+    w = np.array(sol["x"])[:d]
+    return w
 
 
 def simple_test():
