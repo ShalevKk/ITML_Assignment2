@@ -1,3 +1,5 @@
+from typing import List
+
 import cvxopt
 import numpy as np
 from cvxopt import solvers, matrix, spmatrix, spdiag, sparse
@@ -96,8 +98,50 @@ def simple_test():
     print(f"The {i}'th test sample was classified as {predicty}")
 
 
+def run_question2_tests():
+    # load question 2 data
+    data = np.load('EX2q2_mnist.npz')
+    trainX = data['Xtrain']
+    testX = data['Xtest']
+    trainy = data['Ytrain']
+    testy = data['Ytest']
+
+    avg_list: List[float] = []
+    min_error_list: List[float] = []
+    max_error_list: List[float] = []
+
+    choice: str = '\0'
+    while choice not in ['1', '2']:
+        choice = input("Please enter the experiment number you wish to run 1/2: ")
+
+    # -----------------------------------------------Question_2Experiment1----------------------------------------------
+    if choice == '1':
+        m: int = 100
+        for n in range(-1, 12):
+            l: float = 10 ** n
+            errors: List[float] = []
+            for i in range(1, 11):
+                indices = np.random.permutation(trainX.shape[0])
+                _trainX = trainX[indices[:m]]
+                _trainy = trainy[indices[:m]]
+                w: np.ndarray = softsvm(l=l, trainX=trainX, trainy=trainy)
+
+
+    # -----------------------------------------------Question_2Experiment2----------------------------------------------
+    else:
+        m: int = 1000
+        errors: List[float] = []
+        for n in [1, 3, 5, 8]:
+            l: float = 10 ** n
+            indices = np.random.permutation(trainX.shape[0])
+            _trainX = trainX[indices[:m]]
+            _trainy = trainy[indices[:m]]
+            w: np.ndarray = softsvm(l=l, trainX=trainX, trainy=trainy)
+
+
 if __name__ == '__main__':
     # before submitting, make sure that the function simple_test runs without errors
     simple_test()
 
     # here you may add any code that uses the above functions to solve question 2
+    run_question2_tests()
