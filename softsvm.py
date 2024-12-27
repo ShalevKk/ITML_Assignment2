@@ -1,9 +1,37 @@
+import cvxopt
 import numpy as np
 from cvxopt import solvers, matrix, spmatrix, spdiag, sparse
 import matplotlib.pyplot as plt
 
 
 # todo: complete the following functions, you may add auxiliary functions or define class to help you
+
+def define_H(l: float, d: int, m: int):
+    H11: np.ndarray = np.identity(d)
+    H12: np.ndarray = np.zeros((d, m))
+    H21: np.ndarray = np.zeros((m, d))
+    H22: np.ndarray = np.zeros((m, m))
+    upper_part: np.ndarray = np.concatenate((H11, H12), axis=1)
+    lower_part: np.ndarray = np.concatenate((H21, H22), axis=1)
+    H: np.ndarray = np.concatenate((upper_part, lower_part), axis=0)
+    return 2 * l * H
+
+
+def define_u(d: int, m: int) -> np.ndarray:
+    u1: np.ndarray = np.zeros((d, 1))
+    u2: np.ndarray = 1 / m * np.ones((m, 1))
+    return np.vstack((u1, u2))
+
+
+def define_A():
+    return None
+
+
+def define_v(m: int) -> np.ndarray:
+    v1: np.ndarray = np.ones((m, 1))
+    v2: np.ndarray = np.zeros((m, 1))
+    return np.vstack((v1, v2))
+
 
 def softsvm(l, trainX: np.array, trainy: np.array):
     """
@@ -13,7 +41,20 @@ def softsvm(l, trainX: np.array, trainy: np.array):
     :param trainy: numpy array of size (m, 1) containing the labels of the training sample
     :return: linear predictor w, a numpy array of size (d, 1)
     """
-    raise NotImplementedError()
+
+    # dimensions
+    m: int = trainX.shape[0]
+    d: int = trainX.shape[1]
+
+    # TODO: consider sparse the matrices
+    H: matrix = matrix(define_H(l=l, d=d, m=m))
+    u: matrix = matrix(define_u(d=d, m=m))
+    A: matrix = matrix(define_A())
+    v: matrix = matrix(define_v(m=m))
+
+    sol = cvxopt.solvers.qp(H, u, -A, -v)
+
+    return sol["x"]
 
 
 def simple_test():
